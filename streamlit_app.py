@@ -61,13 +61,40 @@ with st.form("item_form"):
         st.success(f"Item '{name}' added successfully!")
 
 
+import sqlite3
+import streamlit as st
+import pandas as pd
+
+# Connect to SQLite database
+DB_FILE = "lcm.db"
+conn = sqlite3.connect(DB_FILE)
+cursor = conn.cursor()
+
+# Create the 'item' table if it doesn't exist
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS item (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    category TEXT,
+    purchase_date DATE,
+    responsible_person TEXT,
+    status TEXT
+)
+""")
+conn.commit()
+
+# View items
 st.title("View Items")
+
+# Query the database
 cursor.execute("SELECT * FROM item")
 rows = cursor.fetchall()
 
 if rows:
-    import pandas as pd
+    # Convert rows to a DataFrame
     df = pd.DataFrame(rows, columns=["ID", "Name", "Category", "Purchase Date", "Responsible Person", "Status"])
     st.dataframe(df)
 else:
-    st.info("No items found in the database.")
+    # Inform the user if there are no items
+    st.info("No items found in the database. Add some items to see them here.")
+
